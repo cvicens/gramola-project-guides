@@ -8,6 +8,10 @@ modules:
     name: Getting Started
   project-intro:
     name: Project Intro
+  files-service:
+    name: Files Service with Node.js
+  events-service:
+    name: Events Service with Spring Boot
   spring-boot:
     name: Microservices with Spring Boot
   spring-boot-che:

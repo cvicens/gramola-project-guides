@@ -5,6 +5,7 @@ content:
   url: https://raw.githubusercontent.com/openshift-labs/cloud-native-guides/ocp-3.10
 
 vars:
+  GIT_RAW_URL: https://raw.githubusercontent.com/cvicens/gramola-project/master
   OPENSHIFT_DOCS_BASE: "https://docs.openshift.com/container-platform/3.10"
   PROJECT_NAME: "gramola-cicd"
   DOWNLOAD_CLIENT_WINDOWS: https://mirror.openshift.com/pub/openshift-v3/clients/3.10.23/windows/oc.zip
@@ -31,7 +32,8 @@ modules:
   activate:
   - getting-started
   - project-intro
-  - wildfly-swarm
+  - files-service
+  - events-service
   - spring-boot
   - vertx
   - nodejs
