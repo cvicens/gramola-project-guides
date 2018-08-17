@@ -59,7 +59,7 @@ This API should include:
 
 * ***Create event*** which means POST object to **'/'** and return HTTP 201
 * ***Search all events*** which means GET from **'/'** and return HTTP 200 with an array of event objects
-* ***Search events by country and city*** which means GET from **'/{country}/{city}'** and return HTTP 200 with an array of event objects
+* ***Search events by country and city and (optionally) by date greater than or equal to a given date*** which means GET from **'/{country}/{city}'** and return HTTP 200 with an array of event objects
 
 As you can see our event objects are simple, name, location, artist, etc.
 

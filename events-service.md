@@ -174,9 +174,77 @@ $ curl {{GIT_RAW_URL}}/events/base-resources/database.pvc.yml -o ./base-resource
 $ curl {{GIT_RAW_URL}}/events/base-resources/database.svc.yml -o ./base-resources/database.svc.yml
 ~~~
 
-As we have explained before we use the Fabric 8 plugin to deploy directly on Openshift. Fabric 8 uses resources in folder 'src/main/fabric8' to deploy our code using s2i. We need to change these resources to match the database configuration, secret and configmap we just downloaded.
+We use the [Fabric8](http://fabric8.io/) maven plugin to deploy directly to Openshift. Fabric8 uses resources in folder 'src/main/fabric8' to deploy our code using s2i (it plays the same role .nodeshift played in the previous lab). We need to change these resources to match the database configuration, secret and configmap we just downloaded.
 
-> If we hadn't made 
+> This changes are needed just because we drifted a little away from the sample example to make it a bit closer to a production setup
+
+So, let's make those changes. 
+
+First of all we have to rename some elements from 'booster' to 'events', to do so please run the next commands.
+
+~~~shell
+$ sed -i '' 's/<groupId>io.openshift.booster<\/groupId>/<groupId>com.redhat.gramola.events<\/groupId>/g' pom.xml
+$ sed -i '' 's/<artifactId>booster<\/artifactId>/<artifactId>events<\/artifactId>/g' pom.xml
+$ sed -i '' 's/CRUD Booster/CRUD Events/g' pom.xml
+~~~
+
+The second change adds several additional environment variables (filled with configmap and secret values) to the deployment configuration of our service.
+
+~~~shell
+$ mv ./src/main/fabric8/credentials-secret.yml ./src/main/fabric8/credentials-secret.yml.orig
+$ mv ./src/main/fabric8/deployment.yml ./src/main/fabric8/deployment.yml.orig
+$ cat << EOF > ./src/main/fabric8/deployment.yml
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: \${project.artifactId}
+spec:
+  template:
+    spec:
+      containers:
+        - env:
+            - name: DB_USERNAME
+              valueFrom:
+                 secretKeyRef:
+                   name: events-database-secret
+                   key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                 secretKeyRef:
+                   name: events-database-secret
+                   key: password
+            - name: DB_SERVICE_NAME
+              valueFrom:
+                 configMapKeyRef:
+                   name: events-configmap
+                   key: database_service_name
+            - name: DB_SERVICE_PORT
+              valueFrom:
+                 configMapKeyRef:
+                   name: events-configmap
+                   key: database_service_port
+            - name: DB_NAME
+              valueFrom:
+                 configMapKeyRef:
+                   name: events-configmap
+                   key: database_name
+            - name: JAVA_OPTIONS
+              value: "-Dspring.profiles.active=openshift"
+EOF
+~~~
+
+Spring Boot will read properties from files following this pattern application-<profile>.properties. So for profile 'openshift' this means **application-openshift.properties**. Well, we need to adapt this file to match properties defined as enviroment variables in the deployment configuration descriptor. To do so, please run this command.
+
+~~~shell
+$ mv ./src/main/resources/application-openshift.properties ./src/main/resources/application-openshift.properties.orig
+$ cat << EOF > ./src/main/resources/application-openshift.properties
+spring.datasource.url=jdbc:postgresql://\${EVENTS_DATABASE_SERVICE_HOST}:\${EVENTS_DATABASE_SERVICE_PORT}/\${DB_NAME}
+spring.datasource.username=\${DB_USERNAME}
+spring.datasource.password=\${DB_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.hibernate.ddl-auto=create
+EOF
+~~~
 
 Make sure you're still logged in your Openshift cluster and your default project is still {{PROJECT_NAME}}
 
@@ -189,11 +257,14 @@ Now let's create all these resources in our project.
 
 ~~~shell
 $ oc create -f ./base-resources
-
-
+configmap "events-configmap" created
+deploymentconfig "events-database" created
+persistentvolumeclaim "events-database" created
+service "events-database" created
+secret "events-database-secret" created
 ~~~
 
-Before we proceed with the deployment of our Events Service check our data base is up an running.
+Before we proceed with the deployment of our Events Service let's check if our data base is up an running.
 
 ~~~shell
 $ oc get pod -w
@@ -210,303 +281,187 @@ $ mvn clean fabric8:deploy -Popenshift
 
 Now our base code has been packed, an container image has been generated using Openshift Source to Image (s2i), along with some assets, such as an image stream, a deployment configuration, a service and even a route accesible from the outside of our cluster.
 
-To understand this have a look to folder **'.nodeshift'**, there you'll find the following files.
-
-~~~shell
-$ ls .nodeshift/
-deployment.yml	route.yml
-~~~
-
-Let's check again if the service works now using the route generated as part of the  'npm run openshift' command.
+Let's check again if the service works now using the route generated as part of the deploy command.
 
 ~~~shell
 $ oc get route
-NAME      HOST/PORT                                       PATH      SERVICES   PORT      TERMINATION   WILDCARD
-files     files-gramola-cicd.apps.192.168.50.100.nip.io             files      8080                    None
-$ curl http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/greeting
-{"content":"Hello, World!"}
+NAME      HOST/PORT                                         PATH      SERVICES   PORT      TERMINATION   WILDCARD
+events    events-gramola-cicd.apps.192.168.50.100.nip.io              events     8080                    None
+files     files-gramola-cicd.apps.192.168.50.100.nip.io               files      8080                    None
+$ curl http://events-gramola-cicd.apps.192.168.50.100.nip.io/api/fruits
+[{"id":1,"name":"Cherry"},{"id":2,"name":"Apple"},{"id":3,"name":"Banana"}]
 ~~~
 
-
 #### Modify Base Application Code
-So far we have tested the base code, and we're ready to add packages and additional assets so that we have our Files Services and not just the sample code deployed.
+So far we have tested the base code, and we're ready to copy some java classes to implement the Events API we committed to implement.
 
 In summary we have to:
 
-* Add storage to be able to store/read images from disk
-* Add additional packages with 'npm install'
-* Copy/Modify source code to acutally provide the file management features
+* Add sample rows to 'import.sql'
+* Copy/Modify source code to acutally provide the events management features
 
-Before starting creating YAML files for our assets, let's create a folder for our resources under our 'files' folder, we're going to name it base-resources.
-
-~~~shell
-$ pwd
-/Users/cvicensa/openshift/gramola-cicd/files
-$ mkdir base-resources
-~~~
-
-> Note: Either your using Minishift/Cluster Up or a proper Openshift cluster are already created Persistent Volumes have to be ready to use. Cluster Up and Minishift should have already created PVs for you, in a proper cluster an administrator should have take care of this.
-
-##### Add storage
-In order to provide storage to a POD we have to:
-* Add a Persistent Volume (or use an existing one)
-* Create a configmap to hold a property to store the name of the mount point of the folder to upload/read files to/from
-* Create a Persistent Volume Claim
-* Associate a PVC with a volume for the POD to consume
-
-Check the existence of PVs we can use (you need to be admin to check this).
+##### Add sample rows to 'import.sql'
 
 ~~~shell
-$ oc get pv
-~~~
+$ mv ./src/main/resources/import.sql ./src/main/resources/import.sql.orig
+$ cat << EOF > ./src/main/resources/import.sql
+insert into fruit (name) values ('Cherry');
+insert into fruit (name) values ('Apple');
+insert into fruit (name) values ('Banana');
 
-Create a configmap descriptor, pay attention to the key 'upload_dir', it states the directory for uploads and will be used in the deployment configuration.
-
-~~~shell
-$ cat << EOF > ./base-resources/configmap.yml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-     name: files-configmap
-data:
-  upload_dir: "/uploads"
+insert into event (name, address, city, province, country, date, start_time, end_time, location, artist, description, image) values ('Not in the Lifetime Tour', 'Cmo. de Perales, 23, 28041', 'MADRID', 'MADRID', 'SPAIN', '2018-08-05', '18:00', '23:00', 'Caja Magica', 'Guns n Roses', 'The revived Guns N’ Roses and ...', 'guns-P1080795.jpg');
+insert into event (name, address, city, province, country, date, start_time, end_time, location, artist, description, image) values ('CONCRETE AND GOLD TOUR 2018', '8 Boulevard de Bercy, Paris', 'PARIS', 'PARIS', 'FRANCE', '2018-09-15', '18:00', '23:00', 'AccorHotels Arena', 'Foo Fighters', 'Concrete and Gold Tour is...', 'foo-P1000628.jpg');
 EOF
 ~~~
-
-Create a PVC named 'files-uploads'
-
-~~~shell
-$ cat << EOF > ./base-resources/files.pvc.yml
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: files-uploads
-  annotations:
-    description: Defines the PVC associated to files service
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-EOF
-~~~
-
-Associate the PVC with a volume in the Deployment Config, to do so, we're going to replace the contents of file .nodeshift/deployment.yml.
-
-In the following deployment configuration snippet, there are interesting elements:
-
-* An enviroment variable 'UPLOAD_DIR' which value will be filled from the value related to key 'upload_dir' in the configmap we created before
-* Resource restrictions
-* Updated liveness and readiness probes
-* A volumen mount pointing to the PVC we just created
-
-~~~shell
-$ cat << EOF > ./.nodeshift/deployment.yml
-spec:
-  template:
-    spec:
-      containers:
-        - env:
-            - name: UPLOAD_DIR
-              valueFrom:
-                configMapKeyRef:
-                  name: files-configmap
-                  key: upload_dir
-          readinessProbe:
-            httpGet:
-              path: /api/greeting
-              port: 8080
-              scheme: HTTP
-          livenessProbe:
-            httpGet:
-              path: /api/greeting
-              port: 8080
-              scheme: HTTP
-            initialDelaySeconds: 60
-            periodSeconds: 30
-          volumeMounts:
-            - mountPath: /uploads
-              name: files-uploads-data
-      volumes:
-      - name: files-uploads-data
-        persistentVolumeClaim:
-          claimName: files-uploads
-EOF
-~~~
-
-So far we have created descriptor for some assets, now we have to actually create them in our Openshift cluster.
-
-> Note: Assets will be create in the current project or you have to add -n NAME_SPACE to the command to specify the destination namespace
-
-~~~shell
-$ oc create -f base-resources/
-configmap "files-configmap" created
-persistentvolumeclaim "files-uploads" created
-~~~
-
-##### Add additional packages
-Our code uses a module called [**'multer'**](https://www.npmjs.com/package/multer) to deal with the upload and storage of files.
-Additionally we use [**'cors'**](https://www.npmjs.com/package/cors) for cross-origin resource sharing, [**'mime-types'**](https://www.npmjs.com/package/mime-types) to deal with file extensions and mime-types and [**'uuid'**](****) to generate a random uuid v4 to generate the file name when the naming strategy is random.
-
-Let's install these packages doing as follows.
-
-~~~shell
-$ npm install multer mime-types uuid cors --save
-~~~
-
-===> TODO
-**Optional**
-To make the life of the developer easier there are means to reload a node app if a file is updated, you can also install [**'nodemon'**](https://www.npmjs.com/package/nodemon) 
-In addition to installing the package we need to add a script entry to file package.json
-===> TODO
 
 ##### Copy/Modify source code
-Finally it's time to add and update some source code.
+Now it's time to add and update some source code.
 
-Update file **'app.js'** to add the following snippet above ```module.exports = app;```
+Before we go deep down with the java classes, let's remember the API we defined in the Project Intro. This API should include:
 
-~~~javascript
-// Files API
-app.use('/api/files', require('./lib/files.js')());
+* ***Create event*** which means POST object to **'/'** and return HTTP 201
+* ***Search all events*** which means GET from **'/'** and return HTTP 200 with an array of event objects
+* ***Search events by country and city and (optionally) by date greater than or equal to a given date*** which means GET from **'/{country}/{city}/{date}?'** and return HTTP 200 with an array of event objects
+
+If you have a look to the sample classes (Fruit, FruitController, FruitRepository), we should have at least (Event, EventController and EventRepository), we will add to that another class (GenericController).
+
+* **Event**: annotated (@Entity) POJO to shape our Event object
+* **EventController**: annotated (@RestController) class that provides the REST API itself
+* **EventRepository**: extends CrudRepository<X,Y> annotated interface that provides with basic CRUD functionalities by [**Spring Data JPA**](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+
+So we need to add some code or annotation to provide the search of events by country and city and by date greater than or equal to a given date. This means basically this.
+
+~~~java
+public interface EventRepository extends CrudRepository<Event, Integer> {
+	 public List<Event> findByCountryAndCityAndDateGreaterThanEqual(String country, String city, String date);	
+}
 ~~~
 
-File 'app.js' should look liek this one.
+Additionally we need our Event object (annotated as @Entity)
 
-~~~javascript
-'use strict';
+~~~java
+...
+@Entity
+public class Event {
 
-const path = require('path');
-const express = require('express');
-const bodyParser = require('body-parser');
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-const app = express();
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use('/', express.static(path.join(__dirname, 'public')));
-
-// Expose the license.html at http[s]://[host]:[port]/licences/licenses.html
-app.use('/licenses', express.static(path.join(__dirname, 'licenses')));
-
-app.use('/api/greeting', (request, response) => {
-  const name = request.query ? request.query.name : undefined;
-  response.send({ content: `Hi there, ${name || 'World!'}` });
-});
-
-// Files API
-app.use('/api/files', require('./lib/files.js')());
-
-module.exports = app;
-
+    private String name;
+    private String address;
+    private String city;
+    private String province;
+    private String country;
+    private String date;
+    private String startTime;
+    private String endTime;
+    private String location;
+    private String artist;
+    private String description;
+    private String image;
+    
+    ...
+ }
 ~~~
 
-As you can see, Files API code is at ./lib/files.js and that file doesn't exit yet. Let's take care of this issue.
+And finally we need the controller exposing the API at '/api/events'. As you can see below (only relevant parts shown) the search of events has to endpoints and we check with ``date.isPresent() `` if parameter 'date' has been provided or not.
+
+~~~java
+@RestController
+@RequestMapping(value = "/api/events")
+public class EventController {
+
+    private final EventRepository repository;
+
+    public EventController(EventRepository repository) {
+        this.repository = repository;
+    }
+    
+    @GetMapping({"/{country}/{city}", "/{country}/{city}/{date}"})
+    public List<Event> findByCountryAndCityAndDateGreaterThanEqual(
+    		@PathVariable("country") String country,
+    		@PathVariable("city") String city,
+    		@PathVariable("date") Optional<String> date) {
+
+    	if (date.isPresent()) {
+    		return repository.findByCountryAndCityAndDateGreaterThanEqual(country, city, date.get());
+    	} else {
+    		return repository.findByCountryAndCityAndDateGreaterThanEqual(country, city, "");
+    	}
+    }
+ ...
+ }
+~~~
+
+Let's copy these files to our 'src' folder.
 
 ~~~shell
-$ mkdir lib
-$ curl {{GIT_RAW_URL}}/files/lib/files.js -o ./lib/files.js
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  1682  100  1682    0     0  11783      0 --:--:-- --:--:-- --:--:-- 11845
+curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/Event.java -o src/main/java/com/redhat/gramola/events/service/Event.java
+curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventRepository.java -o src/main/java/com/redhat/gramola/events/service/EventRepository.java
+curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventController.java -o src/main/java/com/redhat/gramola/events/service/EventController.java
 ~~~
-
-Before we proceed with testing the code locally let's modify entry 'files' in package.json because command 'npm run openshift' will take care only of files/directories specified in this entry. After adding "lib" 'files' entry should be.
-
-~~~
-"files": [
-    "package.json",
-    "app.js",
-    "public",
-    "bin",
-    "LICENSE",
-    "licenses",
-    "lib"
-  ]
-  ~~~
 
 ##### Let's test our code locally
-Before we test our code, let's download some sample images, you should be in 'files' directory to run the next commands.
+Now, as we did before let's try our new API locally by using the **'-P'** flag.
 
 ~~~shell
-$ mkdir sample-images
-$ curl {{GIT_RAW_URL}}/files/sample-images/foo-P1000628.jpg -o ./sample-images/foo-P1000628.jpg
-$ curl {{GIT_RAW_URL}}/files/sample-images/guns-P1080795.jpg -o ./sample-images/guns-P1080795.jpg
+$ mvn spring-boot:run -P local
 ~~~
 
-It's time to test locally our code, so.
+Let's test our brand new API. First getting all events.
 
 ~~~shell
-$ npm start
+$ curl http://localhost:8080/api/events
+[{"id":1,"name":"Not in the Lifetime Tour","address":"Cmo. de Perales, 23, 28041","city":"MADRID","province":"MADRID","country":"SPAIN","date":"2018-08-05","startTime":"18:00","endTime":"23:00","location":"Caja Magica","artist":"Guns n Roses","description":"The revived Guns N’ Roses and ...","image":"guns-P1080795.jpg"},{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
 ~~~
 
-From another terminal being in the same directory 'files'.
+Second, looking for events in SPAIN/MADRID.
 
 ~~~shell
-$ curl \
-  -F "naming_strategy=original" \
-  -F "image=@./sample-images/foo-P1000628.jpg" \
-  http://localhost:8080/api/files/upload
-{"result":"success","filename":"foo-P1000628.jpg"}
+$ curl http://localhost:8080/api/events/SPAIN/MADRID
+[{"id":1,"name":"Not in the Lifetime Tour","address":"Cmo. de Perales, 23, 28041","city":"MADRID","province":"MADRID","country":"SPAIN","date":"2018-08-05","startTime":"18:00","endTime":"23:00","location":"Caja Magica","artist":"Guns n Roses","description":"The revived Guns N’ Roses and ...","image":"guns-P1080795.jpg"}]
 ~~~
 
-Finally let's check we can download the file we have just uploaded.
+Second, looking for events in FRANCE/PARIS/2018-09-01 (there should be one) and (there should be none)
 
 ~~~shell
-$ curl http://localhost:8080/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  295k  100  295k    0     0  27.7M      0 --:--:-- --:--:-- --:--:-- 28.9M
+curl http://localhost:8080/api/events/FRANCE/PARIS/2018-09-01
+[{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
+
+$ curl http://localhost:8080/api/events/FRANCE/PARIS/2018-09-16
+[]
 ~~~
 
 ##### Deploy this version of our application to Openshift
-Again let's use nodeshift to deploy our polished new code.
+Next step is to deploy our new code on Openshift, so again we run the following command.
 
 ~~~shell
-$ npm run openshift
-
-> files@1.0.0-SNAPSHOT openshift /Users/cvicensa/openshift/gramola-cicd/files
-> nodeshift --strictSSL=false --dockerImage=registry.access.redhat.com/rhoar-nodejs/nodejs-8
-
-2018-08-14T19:14:31.947Z INFO loading configuration
+$ mvn clean fabric8:deploy -Popenshift
 ...
-2018-08-14T19:15:01.557Z INFO complete
+[INFO] Updated DeploymentConfig: target/fabric8/applyJson/gramola-cicd/deploymentconfig-events.json
+[INFO] F8: HINT: Use the command `oc get pods -w` to watch your pods start up
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 49.935 s
+[INFO] Finished at: 2018-08-17T09:46:20+02:00
+[INFO] Final Memory: 76M/755M
+[INFO] ------------------------------------------------------------------------
 ~~~
+
 
 ##### Tests after deployment
-Check if 'files' pod is up and running.
-
-~~~shell
-$ oc get po -w
-NAME                READY     STATUS      RESTARTS   AGE
-files-3-gwrlv       1/1       Running     0          4d
-~~~
-
-Find the route to the service.
+Now let's run our tests against the route exposed.
 
 ~~~shell
 $ oc get route
-NAME      HOST/PORT                                       PATH      SERVICES   PORT      TERMINATION   WILDCARD
-files     files-gramola-cicd.apps.192.168.50.100.nip.io             files      8080                    None
+NAME      HOST/PORT                                         PATH      SERVICES   PORT      TERMINATION   WILDCARD
+events    events-gramola-cicd.apps.192.168.50.100.nip.io              events     8080                    None
+files     files-gramola-cicd.apps.192.168.50.100.nip.io               files      8080                    None
+$ curl http://events-gramola-cicd.apps.192.168.50.100.nip.io/api/events/FRANCE/PARIS/2018-09-01
+[{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
 ~~~
 
-Upload our sample file
-
-~~~shell
-$ curl \
-  -F "naming_strategy=original" \
-  -F "image=@./sample-images/foo-P1000628.jpg" \
-  http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/files/upload
-{"result":"success","filename":"foo-P1000628.jpg"}
-~~~
-
-Download the file you just uploaded
-
-~~~shell
-$ curl http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  295k  100  295k    0     0  20.3M      0 --:--:-- --:--:-- --:--:-- 20.6M
-~~~
 
 Well done! You are ready to move on to the next lab.
