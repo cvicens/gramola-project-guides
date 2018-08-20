@@ -396,7 +396,13 @@ $ curl http://localhost:8080/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
 ~~~
 
 ##### Deploy this version of our application to Openshift
-Again let's use nodeshift to deploy our polished new code.
+Before we redeploy and just because we have modified the deployment configuration we have to delete it first.
+
+~~~shell
+$ oc delete dc files
+~~~
+
+Now we can use nodeshift to deploy our new code.
 
 ~~~shell
 $ npm run openshift

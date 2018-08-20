@@ -1,5 +1,5 @@
 ## Events Service
-In the same fashion as we created the previous service, we're goint to use the Red Hat Developer Launch site to create the Events Service.
+In the same fashion as we created the previous service, we're going to use the Red Hat Developer Launch site to create the Events Service.
 
 So again let's log in [here](https://developers.redhat.com/launch/) and after a successful login click on the 'LAUNCH YOUR PROJECT' button to access the Missions area.
 
@@ -8,7 +8,7 @@ Please enter 'events' as the name of the application and click 'Continue'.
 ![Create application]({% image_path launch-site-create-application-events.png %}){:width="700px"}
 
 In this lab we're going to generate a skeleton for our Events Service based on Spring Boot and modify it locally to run it later in our own Openshift cluster. So, 
-let's select 'Build and Run Locally' as our target enviroment. Should you wanted to use your own Red Hat operated Openshift cluster you should choose 'Code Locally, Build and Deploy'.
+let's select 'Build and Run Locally' as our target environment. Should you wanted to use your own Red Hat operated Openshift cluster you should choose 'Code Locally, Build and Deploy'.
 ![Build and Run Locally]({% image_path launch-site-build-run-events.png %}){:width="700px"}
 
 Now let's choose 'CRUD' and Spring Boot 1.5.14.RELEASE (RHOAR) as our mission and runtime.
@@ -167,11 +167,11 @@ Let's create a folder for descriptor for these resources and download some suita
 
 ~~~shell
 $ mkdir base-resources
-$ curl {{GIT_RAW_URL}}/events/base-resources/configmap.yml -o ./base-resources/configmap.yml
-$ curl {{GIT_RAW_URL}}/events/base-resources/secret.yml -o ./base-resources/secret.yml
-$ curl {{GIT_RAW_URL}}/events/base-resources/database.dc.yml -o ./base-resources/database.dc.yml
-$ curl {{GIT_RAW_URL}}/events/base-resources/database.pvc.yml -o ./base-resources/database.pvc.yml
-$ curl {{GIT_RAW_URL}}/events/base-resources/database.svc.yml -o ./base-resources/database.svc.yml
+$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/configmap.yml -o ./base-resources/configmap.yml
+$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/secret.yml -o ./base-resources/secret.yml
+$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.dc.yml -o ./base-resources/database.dc.yml
+$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.pvc.yml -o ./base-resources/database.pvc.yml
+$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.svc.yml -o ./base-resources/database.svc.yml
 ~~~
 
 We use the [Fabric8](http://fabric8.io/) maven plugin to deploy directly to Openshift. Fabric8 uses resources in folder 'src/main/fabric8' to deploy our code using s2i (it plays the same role .nodeshift played in the previous lab). We need to change these resources to match the database configuration, secret and configmap we just downloaded.
@@ -233,7 +233,7 @@ spec:
 EOF
 ~~~
 
-Spring Boot will read properties from files following this pattern application-<profile>.properties. So for profile 'openshift' this means **application-openshift.properties**. Well, we need to adapt this file to match properties defined as enviroment variables in the deployment configuration descriptor. To do so, please run this command.
+Spring Boot will read properties from files following this pattern application-<profile>.properties. So for profile 'openshift' this means **application-openshift.properties**. Well, we need to adapt this file to match properties defined as environment variables in the deployment configuration descriptor. To do so, please run this command.
 
 ~~~shell
 $ mv ./src/main/resources/application-openshift.properties ./src/main/resources/application-openshift.properties.orig
@@ -298,7 +298,7 @@ So far we have tested the base code, and we're ready to copy some java classes t
 In summary we have to:
 
 * Add sample rows to 'import.sql'
-* Copy/Modify source code to acutally provide the events management features
+* Copy/Modify source code to actually provide the events management features
 
 ##### Add sample rows to 'import.sql'
 
@@ -397,9 +397,9 @@ public class EventController {
 Let's copy these files to our 'src' folder.
 
 ~~~shell
-curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/Event.java -o src/main/java/com/redhat/gramola/events/service/Event.java
-curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventRepository.java -o src/main/java/com/redhat/gramola/events/service/EventRepository.java
-curl {{GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventController.java -o src/main/java/com/redhat/gramola/events/service/EventController.java
+curl {{PROJECT_GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/Event.java -o src/main/java/com/redhat/gramola/events/service/Event.java
+curl {{PROJECT_GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventRepository.java -o src/main/java/com/redhat/gramola/events/service/EventRepository.java
+curl {{PROJECT_GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventController.java -o src/main/java/com/redhat/gramola/events/service/EventController.java
 ~~~
 
 ##### Let's test our code locally
@@ -462,6 +462,5 @@ files     files-gramola-cicd.apps.192.168.50.100.nip.io               files     
 $ curl http://events-gramola-cicd.apps.192.168.50.100.nip.io/api/events/FRANCE/PARIS/2018-09-01
 [{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
 ~~~
-
 
 Well done! You are ready to move on to the next lab.
