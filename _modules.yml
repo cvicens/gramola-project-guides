@@ -4,6 +4,7 @@ config:
 modules:
   getting-started:
     name: Getting Started
+
   getting-started-che:
     name: Getting Started
 

@@ -55,6 +55,10 @@ oc run apb --restart=Never --image="openshiftapb/cloudnative-workshop-apb:ocp-3.
 
 Or if you have Ansible installed locally, you can also run the Ansilbe playbooks directly on your machine:
 
+> NOTE:
+ sudo pip3 install openshift
+ sudo ansible-galaxy install -r requirements-travis.yml
+
 ```
 oc login
 oc new-project lab-infra

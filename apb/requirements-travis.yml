@@ -15,5 +15,7 @@
   name: openshift_eclipse_che
 
 - src: ansible.kubernetes-modules
+  version: v0.3.1-6
 
 - src: ansibleplaybookbundle.asb-modules
+  version: 0.0.1

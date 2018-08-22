@@ -136,57 +136,12 @@
       install_java_oc_stack: false
       install_custom_stacks_json: |
         [{
-          "name": "Java Cloud-Native",
-          "description": "Java JDK Stack on CentOS for Cloud-Native Workshop",
+          "name": "Mobile Cloud-Native",
+          "id": "java-node-oc-centos-cloudnative",
+          "description": "Java JDK and Node.js Stack on CentOS for Mobile Cloud-Native Workshop",
           "scope": "general",
           "workspaceConfig": {
-            "environments": {
-              "default": {
-                "recipe": {
-                  "type": "dockerimage",
-                  "content": "siamaksade/che-centos-jdk8"
-                },
-                "machines": {
-                  "dev-machine": {
-                    "env": {
-                      "MAVEN_OPTS" : "-Xmx512m",
-                      "MAVEN_MIRROR_URL": "http://nexus:8081/repository/maven-all-public"
-                    },
-                    "servers": {
-                      "8080/tcp": {
-                        "attributes": {},
-                        "protocol": "http",
-                        "port": "8080"
-                      },
-                      "8000/tcp": {
-                        "attributes": {},
-                        "protocol": "http",
-                        "port": "8000"
-                      },
-                      "9000/tcp": {
-                        "attributes": {},
-                        "protocol": "http",
-                        "port": "9000"
-                      },
-                      "9001/tcp": {
-                        "attributes": {},
-                        "protocol": "http",
-                        "port": "9001"
-                      }
-                    },
-                    "volumes": {},
-                    "installers": [
-                      "org.eclipse.che.exec",
-                      "org.eclipse.che.terminal",
-                      "org.eclipse.che.ws-agent"
-                    ],
-                    "attributes": {
-                      "memoryLimitBytes": "2147483648"
-                    }
-                  }
-                }
-              }
-            },
+            "defaultEnv": "default",
             "commands": [
               {
                 "commandLine": "mvn package -f ${current.project.path}",
@@ -250,10 +205,63 @@
                   "goal": "Deploy",
                   "previewUrl": ""
                 }
+              },
+              {
+                "commandLine": "cd ${current.project.path} && npm install && npm run openshift",
+                "name": "npm run openshift",
+                "type": "npm",
+                "attributes": {}
               }
             ],
+            "environments": {
+              "default": {
+                "recipe": {
+                  "type": "dockerimage",
+                  "content": "cvicens/che-centos-jdk8-node8"
+                },
+                "machines": {
+                  "dev-machine": {
+                    "volumes": {},
+                    "env": {
+                      "MAVEN_OPTS": "-Xmx512m",
+                      "CHE_MACHINE_NAME": "dev-machine",
+                      "MAVEN_MIRROR_URL": "http://nexus:8081/repository/maven-all-public"
+                    },
+                    "installers": [
+                      "org.eclipse.che.exec",
+                      "org.eclipse.che.terminal",
+                      "org.eclipse.che.ws-agent"
+                    ],
+                    "servers": {
+                      "8080/tcp": {
+                        "attributes": {},
+                        "protocol": "http",
+                        "port": "8080"
+                      },
+                      "9001/tcp": {
+                        "attributes": {},
+                        "protocol": "http",
+                        "port": "9001"
+                      },
+                      "9000/tcp": {
+                        "attributes": {},
+                        "protocol": "http",
+                        "port": "9000"
+                      },
+                      "8000/tcp": {
+                        "attributes": {},
+                        "protocol": "http",
+                        "port": "8000"
+                      }
+                    },
+                    "attributes": {
+                      "memoryLimitBytes": "2147483648"
+                    }
+                  }
+                }
+              }
+            },
             "projects": [],
-            "defaultEnv": "default",
             "name": "default",
             "links": []
           },
@@ -271,6 +279,10 @@
               "name": "Maven"
             },
             {
+              "version": "8.x",
+              "name": "Node.js"
+            },
+            {
               "version": "2.4",
               "name": "Ansible"
             },
@@ -279,15 +291,14 @@
               "name": "OpenShift CLI"
             }
           ],
-          "creator": "ide",
           "tags": [
             "Java",
             "JDK",
             "Maven",
             "CentOS",
-            "Git"
-          ],
-          "id": "java-oc-centos-cloudnative"
+            "Git",
+            "Node.js"
+          ]
         }]
     tags: eclipse-che
 
