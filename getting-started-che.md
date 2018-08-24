@@ -17,15 +17,12 @@ ourselves are in love with Eclipse Che and highly recommend it.
 
 Follow these instructions to setup the development environment on Eclipse Che. 
 
-You might be familiar with the Eclipse IDE which is one of the most popular IDEs for Java and other
-programming languages. [Eclipse Che](https://www.eclipse.org/che/) is the next-generation Eclipse IDE which is web-based
-and gives you a full-featured IDE running in the cloud. You have an Eclipse Che instance deployed on your OpenShift cluster
+You might be familiar with the Eclipse IDE which is one of the most popular IDEs for Java and other programming languages. [Eclipse Che](https://www.eclipse.org/che/) is the next-generation Eclipse IDE which is web-based and gives you a full-featured IDE running in the cloud. You have an Eclipse Che instance deployed on your OpenShift cluster
 which you will use during these labs.
 
 Go to the [Eclipse Che url]({{ ECLIPSE_CHE_URL }}) in order to configure your development workspace: {{ ECLIPSE_CHE_URL }}
 
-First, you need to register as a user. Register and choose the same username and password as 
-your OpenShift credentials.
+First, you need to register as a user. Register and choose the same username and password as your OpenShift credentials.
 
 ![Eclipse Che - Register]({% image_path bootstrap-che-register.png %}){:width="700px"}
 
@@ -47,6 +44,18 @@ It takes a little while for the workspace to be ready. When it's ready, you will
 Eclipse Che IDE running in your browser.
 
 ![Eclipse Che Workspace]({% image_path bootstrap-che-workspace.png %})
+
+Let's create a **'blank project'** where we're going to put the source code of our projects. Click on **'Create Project...'** link,you can find in on the left side or in the middle of your workspace.
+![Create a Blank Project 1/2]({% image_path bootstrap-che-create-blank-project-1.png %})
+
+Select **'Blank'** as type, name it **'{{PROJECT_FOLDER_NAME}}'** and click on **'Create'**.
+![Create a Blank Project 2/2]({% image_path bootstrap-che-create-blank-project-2.png %})
+
+Now you should see our project on the Projects area on the left side.
+![Blank Project]({% image_path bootstrap-che-blank-project.png %})
+
+Now go to the Eclipse Che terminal window and type `ls` you should see the folder **'{{PROJECT_FOLDER_NAME}}'**.
+![Blank Project]({% image_path bootstrap-che-blank-project-terminal.png %})
 
 Now you can import the project skeletons into your workspace.
 

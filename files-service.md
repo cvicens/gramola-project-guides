@@ -27,7 +27,7 @@ You should notice a file being downloaded. This zip file contains the base code 
 
 ![Next Steps]({% image_path launch-site-next-steps-files.png %}){:width="700px"}
 
-#### Test and Deploy before changes
+#### Test and Deploy before making any changes
 Please open a terminal window and check Node.js 8.x is available.
 
 ~~~shell

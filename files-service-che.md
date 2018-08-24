@@ -1,4 +1,4 @@
-## File Service with Eclipse Che
+## File Service
 To create this service and run it later in Openshift the Red Hat Developer Launch site provides us with so-called missions, wizzard-like accelerators.
 
 In order to enjoy them you need to have a Red Hat Developer account and log in [here](https://developers.redhat.com/launch/) as in the next picture.
@@ -23,47 +23,40 @@ Time to generate our Node.js REST enabled sample application to be the base of o
 
 You should notice a file being downloaded. This zip file contains the base code we need.
 
-> Unfortunately the naming is not correct and the zip file is named as 'booster.zip' instead of 'files.zip'
+> IMPORTANT: Unfortunately the naming is not correct and the zip file is named as 'booster.zip' instead of 'files.zip'. Please rename this file as **'booster-files.zip'**.
 
 ![Next Steps]({% image_path launch-site-next-steps-files.png %}){:width="700px"}
 
 #### Import our base code into an Eclipse Che Workspace
-In the project explorer pane, click on the **Import Projects...** and enter the following:
+Go to the [Eclipse Che url]({{ ECLIPSE_CHE_URL }}) in order to configure your development workspace: {{ ECLIPSE_CHE_URL }}
 
-  * Type: `ZIP`
-  * URL: `{{LABS_DOWNLOAD_URL}}`
-  * Name: `labs`
-  * Check **Skip the root folder of the archive**
+Let's upload the file we just generated (should be 'booster-files.zip' if you renamed as instructed). Please click on **'{{PROJECT_FOLDER_NAME}}'** in the Project Explorer on the left and then select **'Project→Upload File'**.
 
-![Eclipse Che - Import Project]({% image_path bootstrap-che-import.png %}){:width="700px"}
+> **WARNING: If you don't select a project in the Project Explorer the option 'Upload File' is not displayed.**
 
-Click on **Import**. Make sure you choose the **Blank** project configuration since the zip file contains multiple 
-project skeletons. Click on **Save**
+![Upload booster 1]({% image_path files-service-upload-booster-1.png %}){:width="700px"}
 
-![Eclipse Che - Import Project]({% image_path bootstrap-che-import-save.png %}){:width="700px"}
+Choose our booster file and click on **'Upload'**.
+![Upload booster 2]({% image_path files-service-upload-booster-2.png %}){:width="700px"}
 
-The projects are imported now into your workspace and is visible in the project explorer.
+At this point our file is up and we have to unzip it and change the folder name ('booster' by default) to 'files'.
+![Upload booster 3]({% image_path files-service-upload-booster-3.png %}){:width="700px"}
 
-Eclipse Che is a full featured IDE and provides language specific capabilities for various project types. In order to 
-enable these capabilities, let's convert the imported project skeletons to a Maven projects. 
+Unzip and rename 'booster' folder to 'files'. Go the Che terminal and run this commands.
 
-In the project explorer, right-click on **catalog-spring-boot** and then click on **Convert to Project**.
+~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}
+$ unzip booster-files.zip ; mv booster files
+~~~
 
-![Eclipse Che - Convert to Project]({% image_path bootstrap-che-convert.png %}){:width="600px"}
+One more step before we can work with our code. Right click on 'files' folder on the Project Explorer and select **'Convert To Project'**.
+![Convert To Project 1]({% image_path files-service-convert-to-project-1.png %}){:width="700px"}
 
-Choose **Maven** from the project configurations and then click on **Save**
+Select NODE.JS/Node.js and click **'Save'**.
+![Convert To Project 2]({% image_path files-service-convert-to-project-2.png %}){:width="700px"}
 
-![Eclipse Che - Convert to Project]({% image_path bootstrap-che-maven.png %}){:width="700px"}
-
-Repeat the above for **inventory-wildfly-swarm** and **gateway-vertx** projects.
-
-Note the **Terminal** window in Eclipse Che. For the rest of these labs, anytime you need to run 
-a command in a terminal, you can use the Eclipse Che **Terminal** window.
-
-![Eclipse Che - Terminal]({% image_path bootstrap-che-terminal.png %})
-
-#### Test and Deploy before changes
-Please open a terminal window and check Node.js 8.x is available.
+#### Test and Deploy before making any changes
+Please open the Che terminal window and check Node.js 8.x is available.
 
 ~~~shell
 $ node --version
@@ -72,46 +65,20 @@ $ npm --version
 5.6.0
 ~~~
 
-Create a directory for our project and change to it.
-
-~~~shell
-$ mkdir {{PROJECT_NAME}}
-$ cd {{PROJECT_NAME}}
-~~~
-
 At this time 'oc' tool should be properly installed and you should be logged in already. If not, please go back to 'Getting Started - Explore OpenShift with OpenShift CLI' and login as suggested. Then go to your project as shown here.
 
 ~~~shell
 $ oc project {{PROJECT_NAME}}
 ~~~
 
-Copy move the zip file downloaded to our project directory.
+Open file **'package.json'** and replace 'booster' with 'files', which is the name we want for our service. Next picture shows 'package.json' file after the change.
 
-~~~shell
-$ mv ~/Downloads/booster.zip .
-$ unzip booster.zip 
-Archive:  booster.zip
-   creating: booster/
-  inflating: booster/.gitignore      
- ...
-inflating: booster/README.adoc  
-~~~
-
-Let's rename the directory as 'files' and open your file editor to show the file structure. We're going to use Code, please choose the one you like.
-
-~~~shell
-$ mv booster files
-$ cd files
-$ code .
-~~~
-
-Replace 'booster' with 'files', which is the name we want for our service and let's test the app first locally. Next picture shows how we did it with Code.
-
-![Replacing booster]({% image_path replace-booster-with-files.png %}){:width="700px"}
+![Replacing booster]({% image_path files-service-replace-booster-with-files.png %}){:width="700px"}
 
 Let's install packages and run our base code.
 
 ~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/files
 $ npm install && npm start
 
 > booster@1.0.0-SNAPSHOT postinstall /Users/cvicensa/openshift/gramola-cicd/files
@@ -128,58 +95,34 @@ added 1189 packages in 16.833s
 > node .
 ~~~
 
-Now let's check the traditional 'hello world' works properly, to do so, open a new terminal window and run the following.
+Now let's check the traditional 'hello world' works properly, to do so, open a new terminal window. Click on the '+' sign and click on terminal...
+
+![New Che terminal]({% image_path new-che-terminal.png %}){:width="700px"}
+
+...and run the following.
 
 ~~~shell
 $ curl http://localhost:8080/api/greeting
 {"content":"Hello, World!"}
 ~~~
 
-Finally let's check our application can be deployed to our Openshift cluster directly.
+Finally let's check our application can be deployed to our Openshift cluster directly. Go back to the other terminal window and type 'Ctrl-C' to stop the process, later use the `oc` tool to check we're at {{PROJECT_NAME}} and run `npm run openshift` to deploy our code to Openshift.
 
 ~~~shell
 $ oc project
-Using project "gramola-cicd" on server "https://192.168.50.100:8443".
+Using project "{{PROJECT_NAME}}" on server "{{OPENSHIFT_CONSOLE_URL}}".
 $ npm run openshift
 
 > files@1.0.0-SNAPSHOT openshift /Users/cvicensa/openshift/gramola-cicd/files
 > nodeshift --strictSSL=false --dockerImage=registry.access.redhat.com/rhoar-nodejs/nodejs-8
 
 2018-08-14T15:31:31.976Z INFO loading configuration
-2018-08-14T15:31:32.007Z INFO using namespace gramola-cicd at https://192.168.50.100:8443
-2018-08-14T15:31:32.015Z INFO creating archive of package.json, app.js, public, bin, LICENSE, licenses
-2018-08-14T15:31:32.126Z INFO creating build configuration files-s2i
-2018-08-14T15:31:32.127Z INFO Using s2i image registry.access.redhat.com/rhoar-nodejs/nodejs-8 with tag latest
-2018-08-14T15:31:32.286Z INFO creating image stream files
-2018-08-14T15:31:32.363Z INFO uploading binary archive /Users/cvicensa/openshift/gramola-cicd/files/tmp/nodeshift/build/archive.tar
-2018-08-14T15:31:35.708Z INFO binary upload complete
-2018-08-14T15:31:35.709Z INFO waiting for build to finish
-2018-08-14T15:31:40.703Z TRACE ---> Installing application source
-2018-08-14T15:31:40.703Z TRACE ---> Building your Node application from source
-2018-08-14T15:31:40.703Z TRACE Current git config
-2018-08-14T15:31:40.704Z TRACE url.https://github.com.insteadof=git@github.com:
-2018-08-14T15:31:40.704Z TRACE url.https://.insteadof=ssh://
-2018-08-14T15:31:40.704Z TRACE url.https://github.com.insteadof=ssh://git@github.com
-2018-08-14T15:31:40.704Z TRACE ---> Installing dependencies
-2018-08-14T15:31:40.704Z TRACE ---> Using 'npm install -s --only=production'
-2018-08-14T15:31:48.707Z TRACE added 195 packages in 7.725s
-2018-08-14T15:31:48.731Z TRACE ---> Cleaning up npm cache
-2018-08-14T15:31:48.793Z TRACE ---> Setting directory write permissions
-2018-08-14T15:31:50.365Z TRACE 
-2018-08-14T15:31:50.365Z TRACE Pushing image 172.30.1.1:5000/gramola-cicd/files:latest ...
-2018-08-14T15:31:50.790Z TRACE Pushed 5/6 layers, 96% complete
-2018-08-14T15:31:51.060Z TRACE Pushed 6/6 layers, 100% complete
-2018-08-14T15:31:51.331Z TRACE Push successful
-2018-08-14T15:31:52.489Z INFO build files-s2i-1 complete
-2018-08-14T15:31:56.373Z INFO openshift.yaml and openshift.json written to /Users/cvicensa/openshift/gramola-cicd/files/tmp/nodeshift/resource/
-2018-08-14T15:31:56.461Z INFO creating deployment configuration files
-2018-08-14T15:31:56.514Z INFO creating new service files
-2018-08-14T15:31:56.569Z INFO creating new route files
+...
 2018-08-14T15:31:56.759Z INFO route host mapping files-gramola-cicd.apps.192.168.50.100.nip.io
 2018-08-14T15:31:56.759Z INFO complete
 ~~~
 
-Now our base code has been packed, an container image has been generated using Openshift Source to Image (s2i), along with some assets, such as an image stream, a deployment configuration, a service and even a route accesible from the outside of our cluster.
+Now our base code has been packed, a container image has been generated using Openshift Source to Image (s2i), along with some assets, such as an image stream, a deployment configuration, a service and even a route accesible from the outside of our cluster.
 
 To understand this have a look to folder **'.nodeshift'**, there you'll find the following files.
 
@@ -193,8 +136,8 @@ Let's check again if the service works now using the route generated as part of 
 ~~~shell
 $ oc get route
 NAME      HOST/PORT                                       PATH      SERVICES   PORT      TERMINATION   WILDCARD
-files     files-gramola-cicd.apps.192.168.50.100.nip.io             files      8080                    None
-$ curl http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/greeting
+{{FILES_SERVICE_NAME}}   {{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}             {{FILES_SERVICE_NAME}}      8080                    None
+$ curl http://{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/greeting
 {"content":"Hello, World!"}
 ~~~
 
@@ -208,11 +151,11 @@ In summary we have to:
 * Add additional packages with 'npm install'
 * Copy/Modify source code to acutally provide the file management features
 
-Before starting creating YAML files for our assets, let's create a folder for our resources under our 'files' folder, we're going to name it base-resources.
+Before starting creating YAML files for our assets, let's create a folder for our resources under our 'files' folder, we're going to name it **'base-resources'**. 
+
+> If you close all your Che terminal windows, or want to start in a new one, you can use the '+' sign and select terminal. If you do, then change directory: `cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/files`.
 
 ~~~shell
-$ pwd
-/Users/cvicensa/openshift/gramola-cicd/files
 $ mkdir base-resources
 ~~~
 
@@ -224,12 +167,6 @@ In order to provide storage to a POD we have to:
 * Create a configmap to hold a property to store the name of the mount point of the folder to upload/read files to/from
 * Create a Persistent Volume Claim
 * Associate a PVC with a volume for the POD to consume
-
-Check the existence of PVs we can use (you need to be admin to check this).
-
-~~~shell
-$ oc get pv
-~~~
 
 Create a configmap descriptor, pay attention to the key 'upload_dir', it states the directory for uploads and will be used in the deployment configuration.
 
@@ -244,7 +181,7 @@ data:
 EOF
 ~~~
 
-Create a PVC named 'files-uploads'
+Create a PVC (Persistence Volume Claim) named 'files-uploads'
 
 ~~~shell
 $ cat << EOF > ./base-resources/files.pvc.yml
@@ -308,7 +245,7 @@ EOF
 
 So far we have created descriptor for some assets, now we have to actually create them in our Openshift cluster.
 
-> Note: Assets will be create in the current project or you have to add -n NAME_SPACE to the command to specify the destination namespace
+> Note: Assets will be created in the current project or you have to add -n NAME_SPACE to the command to specify the destination namespace
 
 ~~~shell
 $ oc create -f base-resources/
@@ -322,27 +259,31 @@ Additionally we use [**'cors'**](https://www.npmjs.com/package/cors) for cross-o
 
 Let's install these packages doing as follows.
 
+> **WARNING: Be sure package.json file is closed in Eclipse Che before running the next command.**
+
 ~~~shell
 $ npm install multer mime-types uuid cors --save
 ~~~
 
-===> TODO
+===> TODO Carlos: explain this in detail or delete...
+
 **Optional**
 To make the life of the developer easier there are means to reload a node app if a file is updated, you can also install [**'nodemon'**](https://www.npmjs.com/package/nodemon) 
 In addition to installing the package we need to add a script entry to file package.json
+
 ===> TODO
 
 ##### Copy/Modify source code
 Finally it's time to add and update some source code.
 
-Update file **'app.js'** to add the following snippet above ```module.exports = app;```
+Open file 'app.js' by double-clicking on it in the Project Explorer and add the following snippet above `module.exports = app;`
 
 ~~~javascript
 // Files API
 app.use('/api/files', require('./lib/files.js')());
 ~~~
 
-File 'app.js' should look liek this one.
+File 'app.js' should look like this one.
 
 ~~~javascript
 'use strict';
@@ -372,17 +313,21 @@ module.exports = app;
 
 ~~~
 
-As you can see, Files API code is at ./lib/files.js and that file doesn't exit yet. Let's take care of this issue.
+As you can see, Files API code is at ./lib/files.js and that file doesn't exit yet. Let's take care of this issue. Go again to the Che terminal and do as follows.
+
+> **Note:** If you cannot see new files added from the terminal in the Project Explorer, right click on the project and select 'Refresh'
 
 ~~~shell
 $ mkdir lib
-$ curl https://raw.githubusercontent.com/cvicens/gramola-project/master/files/lib/files.js -o ./lib/files.js
+$ curl {{PROJECT_GIT_RAW_URL}}/files/lib/files.js -o ./lib/files.js
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  1682  100  1682    0     0  11783      0 --:--:-- --:--:-- --:--:-- 11845
 ~~~
 
-Before we proceed with testing the code locally let's modify entry 'files' in package.json because command 'npm run openshift' will take care only of files/directories specified in this entry. After adding "lib" 'files' entry should be.
+Before we proceed with testing the code locally let's modify entry 'files' in **package.json** because command 'npm run openshift' will take care only of files/directories specified in this entry. After adding "lib" 'files' entry should be.
+
+> In package.json 'files' refers to the files/folders nodeshift through command 'npm run openshift' will take care of to generate the container image with our code.
 
 ~~~json
 "files": [
@@ -397,12 +342,12 @@ Before we proceed with testing the code locally let's modify entry 'files' in pa
 ~~~
 
 ##### Let's test our code locally
-Before we test our code, let's download some sample images, you should be in 'files' directory to run the next commands.
+Before we test our code, let's download some sample images, you should be in 'files' directory to run the next commands. Run these commands  from the Che terminal.
 
 ~~~shell
 $ mkdir sample-images
-$ curl https://raw.githubusercontent.com/cvicens/gramola-project/master/files/sample-images/foo-P1000628.jpg -o ./sample-images/foo-P1000628.jpg
-$ curl https://raw.githubusercontent.com/cvicens/gramola-project/master/files/sample-images/guns-P1080795.jpg -o ./sample-images/guns-P1080795.jpg
+$ curl {{PROJECT_GIT_RAW_URL}}/files/sample-images/foo-P1000628.jpg -o ./sample-images/foo-P1000628.jpg
+$ curl {{PROJECT_GIT_RAW_URL}}/files/sample-images/guns-P1080795.jpg -o ./sample-images/guns-P1080795.jpg
 ~~~
 
 It's time to test locally our code, so.
@@ -414,6 +359,7 @@ $ npm start
 From another terminal being in the same directory 'files'.
 
 ~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/files
 $ curl \
   -F "naming_strategy=original" \
   -F "image=@./sample-images/foo-P1000628.jpg" \
@@ -430,11 +376,13 @@ $ curl http://localhost:8080/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
 100  295k  100  295k    0     0  27.7M      0 --:--:-- --:--:-- --:--:-- 28.9M
 ~~~
 
+You can now stop the process with 'Ctrl-C'.
+
 ##### Deploy this version of our application to Openshift
-Before we redeploy and just because we have modified the deployment configuration we have to delete it first.
+Before we redeploy and because we have modified the deployment configuration we have to delete it first.
 
 ~~~shell
-$ oc delete dc files
+$ oc delete dc {{FILES_SERVICE_NAME}}
 ~~~
 
 Now we can use nodeshift to deploy our new code.
@@ -464,23 +412,28 @@ Find the route to the service.
 ~~~shell
 $ oc get route
 NAME      HOST/PORT                                       PATH      SERVICES   PORT      TERMINATION   WILDCARD
-files     files-gramola-cicd.apps.192.168.50.100.nip.io             files      8080                    None
+{{FILES_SERVICE_NAME}}   {{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}             {{FILES_SERVICE_NAME}}      8080   None
 ~~~
 
-Upload our sample file
+Upload our sample files.
 
 ~~~shell
 $ curl \
   -F "naming_strategy=original" \
   -F "image=@./sample-images/foo-P1000628.jpg" \
-  http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/files/upload
+  http://{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/files/upload
 {"result":"success","filename":"foo-P1000628.jpg"}
+$ curl \
+  -F "naming_strategy=original" \
+  -F "image=@./sample-images/guns-P1080795.jpg" \
+  http://{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/files/upload
+{"result":"success","filename":"guns-P1080795.jpg"}
 ~~~
 
 Download the file you just uploaded
 
 ~~~shell
-$ curl http://files-gramola-cicd.apps.192.168.50.100.nip.io/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
+$ curl http://{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/files/foo-P1000628.jpg -o /tmp/foo-P1000628.jpg
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  295k  100  295k    0     0  20.3M      0 --:--:-- --:--:-- --:--:-- 20.6M

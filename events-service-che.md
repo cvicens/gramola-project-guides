@@ -1,4 +1,4 @@
-## Events Service with Eclipse Che
+## Events Service
 In the same fashion as we created the previous service, we're going to use the Red Hat Developer Launch site to create the Events Service.
 
 So again let's log in [here](https://developers.redhat.com/launch/) and after a successful login click on the 'LAUNCH YOUR PROJECT' button to access the Missions area.
@@ -20,31 +20,53 @@ Time to generate our Spring Boot REST enabled sample application to be the base 
 
 You should notice a file being downloaded. This zip file contains the base code we need.
 
-> Unfortunately the naming is not correct and the zip file is named as 'booster.zip' instead of 'events.zip'
+> IMPORTANT: Unfortunately the naming is not correct and the zip file is named as 'booster.zip' instead of 'events.zip'. Please rename this file as **'booster-events.zip'**.
 
 ![Next Steps]({% image_path launch-site-next-steps-events.png %}){:width="700px"}
 
+#### Import our base code into an Eclipse Che Workspace
+Go to the [Eclipse Che url]({{ ECLIPSE_CHE_URL }}) in order to configure your development workspace: {{ ECLIPSE_CHE_URL }}
+
+Let's upload the file we just generated (should be 'booster-events.zip' if you renamed as instructed). Please click on **'{{PROJECT_FOLDER_NAME}}'** in the Project Explorer on the left and then select **'Project→Upload File'**.
+
+> **WARNING: If you don't select a project in the Project Explorer the option 'Upload File' is not displayed.**
+
+![Upload booster 1]({% image_path events-service-upload-booster-1.png %}){:width="700px"}
+
+Choose our booster file and click on **'Upload'**.
+![Upload booster 2]({% image_path events-service-upload-booster-2.png %}){:width="700px"}
+
+At this point our file is up and we have to unzip it and change the folder name ('booster' by default) to 'events'.
+![Upload booster 3]({% image_path events-service-upload-booster-3.png %}){:width="700px"}
+
+Unzip and rename 'booster' folder to 'events'. Go the Che terminal and run this commands.
+
+~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}
+$ unzip booster-events.zip ; mv booster events
+~~~
+
+One more step before we can work with our code. Right click on 'files' folder on the Project Explorer and select **'Convert To Project'**.
+![Convert To Project 1]({% image_path events-service-convert-to-project-1.png %}){:width="700px"}
+
+Select JAVA/Maven and click **'Save'**.
+![Convert To Project 2]({% image_path events-service-convert-to-project-2.png %}){:width="700px"}
+
 #### Test and Deploy before changes
-Please open a terminal window and check Java 8 and Maven are available.
+Please open the Che terminal window and check Java 8 and Maven are available.
 
 ~~~shell
 $ java -version
-java version "1.8.0_131"
-Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
-Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
+openjdk version "1.8.0_181"
+OpenJDK Runtime Environment (build 1.8.0_181-b13)
+OpenJDK 64-Bit Server VM (build 25.181-b13, mixed mode)
 $ mvn --version
-Apache Maven 3.5.0 (ff8f5e7444045639af65f6095c62210b5713f426; 2017-04-03T21:39:06+02:00)
-Maven home: /usr/local/Cellar/maven/3.5.0/libexec
-Java version: 1.8.0_131, vendor: Oracle Corporation
-Java home: /Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre
-Default locale: en_GB, platform encoding: UTF-8
-OS name: "mac os x", version: "10.13.6", arch: "x86_64", family: "mac"
-~~~
-
-Change to our project's directory "{{PROJECT_NAME}}".
-
-~~~shell
-$ cd {{PROJECT_NAME}}
+Apache Maven 3.3.9 (Red Hat 3.3.9-2.8)
+Maven home: /opt/rh/rh-maven33/root/usr/share/maven
+Java version: 1.8.0_181, vendor: Oracle Corporation
+Java home: /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.181-3.b13.el7_5.x86_64/jre
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "3.10.0-862.el7.x86_64", arch: "amd64", family: "unix"
 ~~~
 
 At this time 'oc' tool should be properly installed and you should be logged in already. If not, please go back to 'Getting Started - Explore OpenShift with OpenShift CLI' and login as suggested. Then go to your project as shown here.
@@ -53,42 +75,22 @@ At this time 'oc' tool should be properly installed and you should be logged in 
 $ oc project {{PROJECT_NAME}}
 ~~~
 
-Copy or move the zip file we just downloaded to our project directory.
+In general you want your code to be in a specific package, so let's rename the generic package **'io.openshift.booster'** as **'com.redhat.gramola.events'**. Select 'io.openshift.booster' package under 'src/main/java' and type ⇧F6 (or select Asistant→Refactoring→Rename) to refactor/rename. 
+![Renaming java package]({% image_path rename-booster-java-package-che-1.png %}){:width="700px"}
 
-~~~shell
-$ mv ~/Downloads/booster.zip .
-$  unzip booster.zip 
-Archive:  booster.zip
-   creating: booster/
-   creating: booster/.circleci/
-  inflating: booster/.circleci/config.yml  
-  ...
-  inflating: booster/README.adoc    
-~~~
+**Don't forget to check 'Rename Subpackages'** and click 'OK' .
+![Renaming java package]({% image_path rename-booster-java-package-che-2.png %}){:width="700px"}
 
-Let's rename the directory as 'events' and open your file editor to show the file structure. We're going to use STS (Spring Tool Suite), you could use Eclipse or other IDEs too.
+You'll be warned that one of the classes contains a main method this could lead to a problem after renaming, click on 'Rename'.
+![Warning renaming java package]({% image_path rename-booster-java-package-che-warning.png %}){:width="400px"}
 
-~~~shell
-$ mv booster events
-~~~
+Let's do the same refactoring within the 'tests' folder under 'src/test/java' as in the next picture, otherwise test classes won't be able to find the classes to run tests on. Again select the package 'io.openshift.booster' package under 'src/main/java' and type ⇧F6 (or select Asistant→Refactoring→Rename). 
 
-Use or create a new workspace (preferably choose {{PROJECT_NAME}}).
-![Create STS workspace]({% image_path create-sts-workspace.png %}){:width="700px"}
+**Don't forget to check 'Rename Subpackages'** and click 'OK' .
+![Renaming tests java package]({% image_path rename-booster-tests-java-package-che-1.png %}){:width="700px"}
 
-Let's add our 'events' project to the workspace by choosing 'File/Open Projects From File System'
-![Create STS workspace]({% image_path open-projects-from-filesystem.png %}){:width="150px"}
-
-Choose our 'events' folder where our sample code is.
-![Events - Project View]({% image_path import-projects-from-file-system.png %}){:width="700px"}
-
-You should end up with a project view like this.
-![Events - Project View]({% image_path events-project-view.png %}){:width="700px"}
-
-In general you want your code to be in a specific package, so let's rename the generic package **'io.openshift.booster'** as **'com.redhat.gramola.events'**. Select 'io.openshift.booster' package under 'src/main/java' and type ⌥⌘R (Alt-Ctr-R) to refactor/rename.
-![Renaming java package]({% image_path rename-booster-java-package.png %}){:width="700px"}
-
-Let's do the same refactoring with the tests folder 'src/test/java' as in the next picture, otherwise test classes won't be able to find the classes to run tests on.
-![Renaming tests java package]({% image_path rename-booster-tests-java-package.png %}){:width="700px"}
+You'll be warned that the destination package already exists, click on 'Rename'.
+![Warning renaming java package]({% image_path rename-booster-tests-java-package-che-warning.png %}){:width="400px"}
 
 Before we test and run our base code locally take a look to the **'profiles'** section in our **'pom.xml'** file, there should be a **'local'** profile as in the next excerpt where there is a dependency with H2.
 
@@ -117,6 +119,7 @@ Before we test and run our base code locally take a look to the **'profiles'** s
 Before running our code let's run some unit tests on our code as follows.
 
 ~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/{{EVENTS_SERVICE_NAME}}
 $  mvn test
 [INFO] Scanning for projects...
 ...
@@ -140,21 +143,18 @@ $ mvn spring-boot:run -P local
 ...
 2018-08-16 12:03:09.048  INFO 4819 --- [  restartedMain] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
 2018-08-16 12:03:09.054  INFO 4819 --- [  restartedMain] c.r.gramola.events.BoosterApplication    : Started BoosterApplication in 4.396 seconds (JVM running for 4.803)
-2018-08-16 12:03:14.367  INFO 4819 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring FrameworkServlet 'dispatcherServlet'
-2018-08-16 12:03:14.367  INFO 4819 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization started
-2018-08-16 12:03:14.384  INFO 4819 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : FrameworkServlet 'dispatcherServlet': initialization completed in 17 ms
+...
 2018-08-16 12:03:15.289  INFO 4819 --- [nio-8080-exec-3] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
 ~~~
 
-Let's test the sample API that implements a CRUD façade to manage Fruit objects. Next curl command uses GET '/' which should return all Fruit objects stored.
+Let's test the sample API that implements a CRUD façade to manage Fruit objects. Next curl command uses GET '/' which should return all Fruit objects stored. Open a new terminal window. Click on the '+' sign and click on terminal...
 
 ~~~shell
 $ curl http://localhost:8080/api/fruits/
 [{"id":1,"name":"Cherry"},{"id":2,"name":"Apple"},{"id":3,"name":"Banana"}]
 ~~~
 
-You can also open a browser tab and point to http://localhost:8080/ you should be able to see a simple user interface like this one.
-![CRUD UI]({% image_path sample-fruits-crud-ui.png %}){:width="700px"}
+Stop the process with Ctrl+C.
 
 Next step should be run/test our base code in Openshift, but before that we need to deploy some basic resources.
 
@@ -163,15 +163,21 @@ We're going to need some resources before we deploy our base code: a PostgreSQL 
 
 Additionally, we are going to make some changed on the sample application code generated in order to make it easier to maintain and share.
 
+Change to our 'Events Service' project's directory "{{PROJECT_FOLDER_NAME}}/{{EVENTS_SERVICE_NAME}}".
+
+~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/{{EVENTS_SERVICE_NAME}}
+~~~
+
 Let's create a folder for descriptor for these resources and download some suitable descriptors there.
 
 ~~~shell
-$ mkdir base-resources
-$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/configmap.yml -o ./base-resources/configmap.yml
-$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/secret.yml -o ./base-resources/secret.yml
-$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.dc.yml -o ./base-resources/database.dc.yml
-$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.pvc.yml -o ./base-resources/database.pvc.yml
-$ curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.svc.yml -o ./base-resources/database.svc.yml
+mkdir base-resources
+curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/configmap.yml -o ./base-resources/configmap.yml
+curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/secret.yml -o ./base-resources/secret.yml
+curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.dc.yml -o ./base-resources/database.dc.yml
+curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.pvc.yml -o ./base-resources/database.pvc.yml
+curl {{PROJECT_GIT_RAW_URL}}/events/base-resources/database.svc.yml -o ./base-resources/database.svc.yml
 ~~~
 
 We use the [Fabric8](http://fabric8.io/) maven plugin to deploy directly to Openshift. Fabric8 uses resources in folder 'src/main/fabric8' to deploy our code using s2i (it plays the same role .nodeshift played in the previous lab). We need to change these resources to match the database configuration, secret and configmap we just downloaded.
@@ -183,9 +189,9 @@ So, let's make those changes.
 First of all we have to rename some elements from 'booster' to 'events', to do so please run the next commands.
 
 ~~~shell
-$ sed -i '' 's/<groupId>io.openshift.booster<\/groupId>/<groupId>com.redhat.gramola.events<\/groupId>/g' pom.xml
-$ sed -i '' 's/<artifactId>booster<\/artifactId>/<artifactId>events<\/artifactId>/g' pom.xml
-$ sed -i '' 's/CRUD Booster/CRUD Events/g' pom.xml
+sed -i 's/<groupId>io.openshift.booster<\/groupId>/<groupId>com.redhat.gramola.events<\/groupId>/g' pom.xml
+sed -i 's/<artifactId>booster<\/artifactId>/<artifactId>events<\/artifactId>/g' pom.xml
+sed -i 's/CRUD Booster/CRUD Events/g' pom.xml
 ~~~
 
 The second change adds several additional environment variables (filled with configmap and secret values) to the deployment configuration of our service.
@@ -250,7 +256,7 @@ Make sure you're still logged in your Openshift cluster and your default project
 
 ~~~shell
 $ oc project
-Using project "gramola-cicd" on server "{{OPENSHIFT_CONSOLE_URL}}".
+Using project "{{PROJECT_NAME}}" on server "{{OPENSHIFT_CONSOLE_URL}}".
 ~~~
 
 Now let's create all these resources in our project.
@@ -285,10 +291,10 @@ Let's check again if the service works now using the route generated as part of 
 
 ~~~shell
 $ oc get route
-NAME      HOST/PORT                                         PATH      SERVICES   PORT      TERMINATION   WILDCARD
-events    events-gramola-cicd.apps.192.168.50.100.nip.io              events     8080                    None
-files     files-gramola-cicd.apps.192.168.50.100.nip.io               files      8080                    None
-$ curl http://events-gramola-cicd.apps.192.168.50.100.nip.io/api/fruits
+NAME	HOST/PORT						PATH	SERVICES	PORT	TERMINATION	WILDCARD
+{{FILES_SERVICE_NAME}}	{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}		{{FILES_SERVICE_NAME}}		8080			None
+{{EVENTS_SERVICE_NAME}}	{{EVENTS_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}		{{EVENTS_SERVICE_NAME}}		8080			None
+$ curl http://{{EVENTS_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/fruits
 [{"id":1,"name":"Cherry"},{"id":2,"name":"Apple"},{"id":3,"name":"Banana"}]
 ~~~
 
@@ -301,6 +307,14 @@ In summary we have to:
 * Copy/Modify source code to actually provide the events management features
 
 ##### Add sample rows to 'import.sql'
+
+Change to our 'Events Service' project's directory "{{PROJECT_FOLDER_NAME}}/{{EVENTS_SERVICE_NAME}}".
+
+~~~shell
+$ cd $CHE_PROJECTS_ROOT/{{PROJECT_FOLDER_NAME}}/{{EVENTS_SERVICE_NAME}}
+~~~
+
+Let's save the original file and create a new one with sample 'event' records.
 
 ~~~shell
 $ mv ./src/main/resources/import.sql ./src/main/resources/import.sql.orig
@@ -323,7 +337,7 @@ Before we go deep down with the java classes, let's remember the API we defined 
 * ***Search all events*** which means GET from **'/'** and return HTTP 200 with an array of event objects
 * ***Search events by country and city and (optionally) by date greater than or equal to a given date*** which means GET from **'/{country}/{city}/{date}?'** and return HTTP 200 with an array of event objects
 
-If you have a look to the sample classes (Fruit, FruitController, FruitRepository), we should have at least (Event, EventController and EventRepository), we will add to that another class (GenericController).
+Have a look to the sample classes (Fruit, FruitController, FruitRepository) generated as part of the booster, in a similar fashion we should have at least (Event, EventController and EventRepository) to implement the comitted API.
 
 * **Event**: annotated (@Entity) POJO to shape our Event object
 * **EventController**: annotated (@RestController) class that provides the REST API itself
@@ -402,7 +416,20 @@ curl {{PROJECT_GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/serv
 curl {{PROJECT_GIT_RAW_URL}}/events/src/main/java/com/redhat/gramola/events/service/EventController.java -o src/main/java/com/redhat/gramola/events/service/EventController.java
 ~~~
 
+As usual we need some tests, let's copy the those to our project.
+
+~~~shell
+curl {{PROJECT_GIT_RAW_URL}}/events/src/test/java/com/redhat/gramola/events/EventsApplicationTest.java -o src/test/java/com/redhat/gramola/events/EventsApplicationTest.java
+curl {{PROJECT_GIT_RAW_URL}}/events/src/test/java/com/redhat/gramola/events/EventsApplicationIT.java -o src/test/java/com/redhat/gramola/events/EventsApplicationIT.java
+~~~
+
 ##### Let's test our code locally
+As usual let's run our unit tests first.
+
+~~~shell
+$ mvn test
+~~~
+
 Now, as we did before let's try our new API locally by using the **'-P'** flag.
 
 ~~~shell
@@ -426,7 +453,7 @@ $ curl http://localhost:8080/api/events/SPAIN/MADRID
 Second, looking for events in FRANCE/PARIS/2018-09-01 (there should be one) and (there should be none)
 
 ~~~shell
-curl http://localhost:8080/api/events/FRANCE/PARIS/2018-09-01
+$ curl http://localhost:8080/api/events/FRANCE/PARIS/2018-09-01
 [{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
 
 $ curl http://localhost:8080/api/events/FRANCE/PARIS/2018-09-16
@@ -456,10 +483,15 @@ Now let's run our tests against the route exposed.
 
 ~~~shell
 $ oc get route
-NAME      HOST/PORT                                         PATH      SERVICES   PORT      TERMINATION   WILDCARD
-events    events-gramola-cicd.apps.192.168.50.100.nip.io              events     8080                    None
-files     files-gramola-cicd.apps.192.168.50.100.nip.io               files      8080                    None
-$ curl http://events-gramola-cicd.apps.192.168.50.100.nip.io/api/events/FRANCE/PARIS/2018-09-01
+NAME	HOST/PORT						PATH	SERVICES	PORT	TERMINATION	WILDCARD
+{{FILES_SERVICE_NAME}}	{{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}		{{FILES_SERVICE_NAME}}		8080			None
+{{EVENTS_SERVICE_NAME}}	{{EVENTS_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}		{{EVENTS_SERVICE_NAME}}		8080			None
+~~~
+
+Finally, let's check if our events API works as expected.
+
+~~~shell
+$ curl http://{{EVENTS_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}/api/events/FRANCE/PARIS/2018-09-01
 [{"id":2,"name":"CONCRETE AND GOLD TOUR 2018","address":"8 Boulevard de Bercy, Paris","city":"PARIS","province":"PARIS","country":"FRANCE","date":"2018-09-15","startTime":"18:00","endTime":"23:00","location":"AccorHotels Arena","artist":"Foo Fighters","description":"Concrete and Gold Tour is...","image":"foo-P1000628.jpg"}]
 ~~~
 
