@@ -9,8 +9,8 @@ vars:
   MOBILE_APP_REPO_NAME: "gramola-app"
   MOBILE_APP_GIT_URL: https://github.com/cvicens/gramola-app
   PROJECT_FOLDER_NAME: "gramola-project"
-  PROJECT_GIT_URL: https://github.com/cvicens/gramola-project
-  PROJECT_GIT_RAW_URL: https://raw.githubusercontent.com/cvicens/gramola-project/master
+  PROJECT_GIT_URL: https://github.com/cvicens/gramola-project-labs
+  PROJECT_GIT_RAW_URL: https://raw.githubusercontent.com/cvicens/gramola-project-labs/master
   OPENSHIFT_DOCS_BASE: "https://docs.openshift.com/container-platform/3.10"
   PROJECT_NAME: "userX-gramola-cicd"
   DOWNLOAD_CLIENT_WINDOWS: https://mirror.openshift.com/pub/openshift-v3/clients/3.10.23/windows/oc.zip
