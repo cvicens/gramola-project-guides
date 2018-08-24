@@ -12,6 +12,7 @@ Go [here](https://hackernoon.com/whats-revolutionary-about-flutter-946915b09514)
 
 #### What's Dart?
 Dart is a OO language, similar to others, Java, C++, C#, TypeScript, ... it supports asynchronous programming through language features and APIs that use Future and Stream objects, and more importantly Dart can be:
+
 * Ahead-of-time (AOT) compiled to fast, predictable, native code,  or 
 * Just-in-time (JIT) compiled for fast development cycles and debugging.
 
@@ -50,17 +51,7 @@ Now it's time to run our blank app, let's do it in the Android virtual device (a
 ~~~shell
 $ flutter run -d emulator-5554
 Using hardware rendering with device Android SDK built for x86. If you get graphics artifacts, consider enabling software rendering with "--enable-software-rendering".
-Launching lib/main.dart on Android SDK built for x86 in debug mode...
-Initializing gradle...                                       1.3s
-Resolving dependencies...                                    2.7s
-Running 'gradlew assembleDebug'...                          15.3s
-Built build/app/outputs/apk/debug/app-debug.apk.
-Installing build/app/outputs/apk/app.apk...                  3.1s
-I/FlutterActivityDelegate(14531): onResume setting current activity to this
-Syncing files to device Android SDK built for x86...             
-D/        (14531): HostConnection::get() New Host Connection established 0x9f223700, tid 14570
-D/EGL_emulation(14531): eglMakeCurrent: 0x9c97c0c0: ver 3 0 (tinfo 0x9f203290)
-
+...
 🔥  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".
 An Observatory debugger and profiler on Android SDK built for x86 is available at: http://127.0.0.1:8100/
 For a more detailed help message, press "h". To quit, press "q".
@@ -111,6 +102,8 @@ According to the routes update ' ' with those values accordingly:
 }
 ~~~
 
+> Login API: 
+
 Now let's run our app, later will explain the code.
 
 ~~~shell
@@ -119,13 +112,29 @@ $ flutter devices
 
 Android SDK built for x86 • emulator-5554                            • android-x86 • Android 8.0.0 (API 26) (emulator)
 iPhone X                  • 2E729265-625D-488A-B41B-BAFEB523F2B4     • ios         • iOS 11.2 (simulator)
+
 $ flutter run -d emulator-5554
 Running "flutter packages get" in gramola-app...             0.7s
 ...
 🔥  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".
 An Observatory debugger and profiler on Android SDK built for x86 is available at: http://127.0.0.1:8100/
 For a more detailed help message, press "h". To quit, press "q".
-
 ~~~
 
-Well done! You are ready to move on to the next lab.
+Login Screen (login API is mocked up even though the code is ready to invoke a real one). Type any user/password, the mocked up user will be 'trever'.
+
+![Login Screen]({% image_path phase-1-login.png %}){:width="300px"}
+
+Events Screen by default shows all events. 
+
+![Events Screen]({% image_path phase-1-all-events.png %}){:width="300px"}
+
+To filter by city please tap lower right corner button.
+
+![Choose city]({% image_path phase-1-choose-city.png %}){:width="300px"}
+
+Result when filtering by city == 'MADRID'.
+
+![Choose city]({% image_path phase-1-city-Madrid.png %}){:width="300px"}
+
+Well done! You've completed all labs.
