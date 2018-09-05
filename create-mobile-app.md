@@ -8,7 +8,7 @@ In short, Flutter is a multiplatform framework (iOS and Android) that takes a di
 
 In simple/rough terms, you code your app using [Dart](https://dart.io), and Flutter takes your code and compiles it (along with the UI components) and generates a binary for iOS or Android.
 
-Go [here](https://hackernoon.com/whats-revolutionary-about-flutter-946915b09514) for a nice article about what's Flutter.
+Go [here](https://hackernoon.com/whats-revolutionary-about-flutter-946915b09514) for a nice article about what Flutter is.
 
 #### What's Dart?
 Dart is a OO language, similar to others, Java, C++, C#, TypeScript, ... it supports asynchronous programming through language features and APIs that use Future and Stream objects, and more importantly Dart can be:
@@ -65,14 +65,15 @@ As you can see 'flutter run' allows us to hot reload changes, open the IDE you c
 
 ![Flutter blank app]({% image_path blank-app-android-change.png %}){:width="300px"}
 
-#### Clonning phase 1 code
+#### Clonning mobile app phase 1 code
 If you remember from the project introduction the plan was to develop an app (phase 1) which would eventually need a new feature (phase 2).
 To make it easier we have prepared the code for 'phase 1' in a branch named, guess how? phase_1
 The code is [here]({{MOBILE_APP_GIT_URL}}) and phase 1 branch can be found [here]({{MOBILE_APP_GIT_URL}}/tree/phase_1).
 
-Let's clone our clode and check out branch 'phase_1'.
+Let's clone our clode and check out branch 'phase_1' in a new terminal.
 
 ~~~shell
+$ mkdir gramola_phase_1 ; cd gramola_phase_1
 $ git clone {{MOBILE_APP_GIT_URL}}
 $ cd {{MOBILE_APP_REPO_NAME}}
 $ git checkout phase_1
@@ -92,7 +93,8 @@ NAME      HOST/PORT                                        PATH      SERVICES   
 {{FILES_SERVICE_NAME}}     {{FILES_SERVICE_NAME}}-{{PROJECT_NAME}}.{{BASE_APPS_HOST}}              {{FILES_SERVICE_NAME}}      8080                    None
 ~~~
 
-According to the routes update ' ' with those values accordingly:
+According to the routes update ' ./data/connections.json' with these values accordingly:
+
 
 ~~~json
 {
@@ -102,7 +104,7 @@ According to the routes update ' ' with those values accordingly:
 }
 ~~~
 
-> Login API: 
+> Login API: this can be "dummy" or a real URL that checks user/password, for the sake of simplicity set to "dummy" or just delete it, as in the previous example.
 
 Now let's run our app, later will explain the code.
 

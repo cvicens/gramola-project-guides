@@ -3,6 +3,8 @@ In the same fashion as we created the previous service, we're going to use the R
 
 So again let's log in [here](https://developers.redhat.com/launch/) and after a successful login click on the 'LAUNCH YOUR PROJECT' button to access the Missions area.
 
+![Launch]({% image_path launch-site.png %}){:width="700px"}
+
 #### Generate Base Application Code
 Please enter 'events' as the name of the application and click 'Continue'.
 ![Create application]({% image_path launch-site-create-application-events.png %}){:width="700px"}

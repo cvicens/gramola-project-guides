@@ -23,3 +23,11 @@ modules:
 
   create-mobile-app:
     name: Create a Mobile App with Flutter
+
+  adding-timeline-feature:
+    name: Adding Timeline Feature
+  adding-timeline-feature-che:
+    name: Adding Timeline Feature
+  
+  create-timeline-module:
+    name: Create the Timeline Module

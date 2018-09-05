@@ -23,11 +23,6 @@ After a successful login we want to show all upcoming events for any location.
 We want the user to choose a different city from a list of cities our company currently has footprint.
 ![List of events]({% image_path gramola-choose-city.png %}){:width="300px"}
 
-==> TO BE MOVED TO ANOTHER FILE!
-Finally once a user selects and events it should be possible see the timeline of her comments related to the event.
-![List of events]({% image_path gramola-timeline.png %}){:width="300px"}
-<== TO BE MOVED TO ANOTHER FILE!
-
 #### Discovering the APIs we need
 So, after analyzing the flow of our application we have found the following APIs we need to define before actually coding our app. They don't have to be perfect or complete (they never are) but at least they should define how requests and responses are and the method to be used (GET, POST, etc.).
 

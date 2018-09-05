@@ -6,6 +6,8 @@ In order to enjoy them you need to have a Red Hat Developer account and log in [
 
 After a successful login you'll land here, where you have to click on the 'LAUNCH YOUR PROJECT' button to access the Missions area.
 
+![Launch]({% image_path launch-site.png %}){:width="700px"}
+
 #### Generate Base Application Code
 Please enter 'files' as the name of the application and click 'Continue'.
 ![Create application]({% image_path launch-site-create-application-files.png %}){:width="700px"}

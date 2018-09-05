@@ -8,6 +8,10 @@ vars:
   BASE_APPS_HOST: "apps.192.168.50.100.nip.io"
   MOBILE_APP_REPO_NAME: "gramola-app"
   MOBILE_APP_GIT_URL: https://github.com/cvicens/gramola-app
+
+  GRAMOLA_TIMELINE_GIT_URL: https://github.com/cvicens/gramola-timeline
+  GRAMOLA_TIMELINE_VERSION: "v0.0.3"
+
   PROJECT_FOLDER_NAME: "gramola-project"
   PROJECT_GIT_URL: https://github.com/cvicens/gramola-project-labs
   PROJECT_GIT_RAW_URL: https://raw.githubusercontent.com/cvicens/gramola-project-labs/master
@@ -27,6 +31,7 @@ vars:
 
   EVENTS_SERVICE_NAME: events
   FILES_SERVICE_NAME: files
+  TIMELINE_SERVICE_NAME: timeline
 
   INVENTORY_ROUTE_HOST: INVENTORY-ROUTE-HOST
   CATALOG_ROUTE_HOST: CATALOG-ROUTE-HOST
@@ -44,3 +49,5 @@ modules:
   - files-service-che
   - events-service-che
   - create-mobile-app
+  - adding-timeline-feature-che
+  - create-timeline-module

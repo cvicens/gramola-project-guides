@@ -27,6 +27,7 @@ vars:
 
   EVENTS_SERVICE_NAME: events
   FILES_SERVICE_NAME: files
+  TIMELINE_SERVICE_NAME: timeline
 
   INVENTORY_ROUTE_HOST: INVENTORY-ROUTE-HOST
   CATALOG_ROUTE_HOST: CATALOG-ROUTE-HOST
@@ -44,3 +45,4 @@ modules:
   - files-service
   - events-service
   - create-mobile-app
+  - adding-timeline-feature
