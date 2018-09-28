@@ -1,7 +1,7 @@
 FROM osevg/workshopper:latest
 
 ENV CONTENT_URL_PREFIX="file:///opt/data/workshopper-content"
-ENV WORKSHOPS_URLS="file:///opt/data/workshopper-content/_cloud-native-roadshow.yml"
+ENV WORKSHOPS_URLS="file:///opt/data/workshopper-content/_cloud-native-mobile-workshop-che.yml"
 ENV DEFAULT_LAB="roadshow"
 
 ADD *.adoc /opt/data/workshopper-content/
