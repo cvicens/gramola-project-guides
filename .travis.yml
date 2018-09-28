@@ -18,5 +18,5 @@ script:
 
 after_success:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker tag $REPO:dev $REPO:$TAG
+  - docker tag $REPO:$TRAVIS_COMMIT $REPO:$TAG
   - docker push $REPO:$TAG
