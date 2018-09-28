@@ -5,6 +5,7 @@ bindable: False
 async: optional
 tags:
 - workshop
+- mobile
 metadata:
   dependencies: []
   displayName: "Mobile Cloud-Native Workshop Installer"
