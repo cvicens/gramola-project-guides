@@ -20,7 +20,7 @@ Agenda
 Install Workshop Infrastructure
 ===
 
-An [APB](https://hub.docker.com/r/openshiftapb/cloudnative-workshop-apb) is provided for 
+An [APB](https://hub.docker.com/r/cvicens/mobile-cloudnative-workshop-apb) is provided for 
 deploying the Cloud-Native Workshop infra (lab instructions, Nexus, Gogs, Eclipse Che, etc) in a project 
 on an OpenShift cluster via the service catalog. In order to add this APB to the OpenShift service catalog, log in 
 as cluster admin and perform the following in the `openshift-ansible-service-broker` project :
@@ -28,9 +28,9 @@ as cluster admin and perform the following in the `openshift-ansible-service-bro
 1. Edit the `broker-config` configmap and add this snippet right after `registry:`:
 
   ```
-    - name: dh
+    - name: gramola
       type: dockerhub
-      org: openshiftapb
+      org: cvicens
       tag: ocp-3.10
       white_list: [.*-apb$]
   ```
