@@ -9,8 +9,11 @@
     openshift_master_url: 
     openshift_user_password:
     project_suffix: "-XX"
-    github_account: openshift-labs
+    github_account: cvicens
+    github_repo: gramola-project-guides
     github_ref: ocp-3.10
+    workshop_file: _cloud-native-mobile-workshop.yml
+    workshop_che_file: _cloud-native-mobile-workshop-che.yml
     gogs_dev_user: developer
     gogs_pwd: openshift
     infrasvcs_adm_user: adminuser
@@ -83,8 +86,8 @@
     vars:
       workshopper_name: guides
       project_name: "{{ namespace }}"
-      workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/cloud-native-guides/{{ github_ref }}"
-      workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/cloud-native-guides/{{ github_ref }}/_cloud-native-workshop.yml"
+      workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/{{ github_repo }}/{{ github_ref }}"
+      workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/{{ github_repo }}/{{ github_ref }}/{{ workshop_file }}"
       workshopper_env_vars:
         PROJECT_SUFFIX: "{{ project_suffix }}"
         COOLSTORE_PROJECT: coolstore{{ project_suffix }}
@@ -100,8 +103,8 @@
     vars:
       workshopper_name: guides-che
       project_name: "{{ namespace }}"
-      workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/cloud-native-guides/{{ github_ref }}"
-      workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/cloud-native-guides/{{ github_ref }}/_cloud-native-workshop-che.yml"
+      workshopper_content_url_prefix: "https://raw.githubusercontent.com/{{ github_account }}/{{ github_repo }}/{{ github_ref }}"
+      workshopper_workshop_urls: "https://raw.githubusercontent.com/{{ github_account }}/{{ github_repo }}/{{ github_ref }}/{{ workshop_che_file }}"
       workshopper_env_vars:
         PROJECT_SUFFIX: "{{ project_suffix }}"
         COOLSTORE_PROJECT: coolstore{{ project_suffix }}
