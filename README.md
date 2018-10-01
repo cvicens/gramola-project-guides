@@ -50,12 +50,17 @@ As an alternative, you can also run the APB directly in a pod on OpenShift to in
 oc login
 oc new-project lab-infra
 
->> OLD >> oc run apb --restart=Never --image="cvicens/mobile-cloudnative-workshop-apb:ocp-3.10" \
->> OLD >>    -- provision -vvv -e namespace=$(oc project -q) -e openshift_token=$(oc whoami -t)
-
 export APB_VARIABLES="'{\"namespace\":\"$(oc project -q)\",\"openshift_token\":\"$(oc whoami -t)\"}'"
 echo ${APB_VARIABLES}
 oc run apb --restart=Never --image="cvicens/mobile-cloudnative-workshop-apb:ocp-3.10" -- provision -vvv ${APB_VARIABLES}
+```
+
+The old way...
+
+```
+oc run apb --restart=Never --image="cvicens/mobile-cloudnative-workshop-apb:ocp-3.10" \
+    -- provision -vvv -e namespace=$(oc project -q) -e openshift_token=$(oc whoami -t)
+
 ```
 
 Or if you have Ansible installed locally, you can also run the Ansilbe playbooks directly on your machine:
