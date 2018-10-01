@@ -44,10 +44,9 @@ ICAgIGRlZmF1bHQ6ICJhZG1pbnB3ZCIKICAgICAgcmVxdWlyZWQ6IHRydWUKICAgICAgZGlzcGxh\
 eV90eXBlOiB0ZXh0CiAgICAgIGRpc3BsYXlfZ3JvdXA6IFdvcmtzaG9wIEluZnJhIFNlcnZpY2Vz"
 
 
-
-
-COPY playbooks /opt/apb/actions
-ADD requirements.yml /opt/apb/actions/requirements.yml
-RUN ansible-galaxy install -r /opt/apb/actions/requirements.yml -f
+#COPY playbooks /opt/apb/actions
+COPY playbooks /opt/apb/project
+ADD requirements.yml /opt/apb/project/requirements.yml
+RUN ansible-galaxy install -r /opt/apb/project/requirements.yml -f
 RUN chmod -R g=u /opt/{ansible,apb}
 USER apb
