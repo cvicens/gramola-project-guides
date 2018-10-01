@@ -63,15 +63,21 @@ oc run apb --restart=Never --image="cvicens/mobile-cloudnative-workshop-apb:ocp-
 
 ```
 
-Or if you have Ansible installed locally, you can also run the Ansilbe playbooks directly on your machine:
-
-> NOTE:
- sudo pip3 install openshift
- sudo ansible-galaxy install -r requirements-travis.yml
+Or if you run the dockar imaga locally:
 
 ```
+docker run --rm -it --entrypoint /bin/bash <image id/name>
+
 oc login
 oc new-project lab-infra
+
+export APB_VARIABLES="'{\"namespace\":\"$(oc project -q)\",\"openshift_token\":\"$(oc whoami -t)\",\"openshift_master_url\":\"$(oc whoami --show-server)\"}'"
+
+ansible-playbook -vvv /opt/apb/project/provision.yml \
+       -e namespace=$(oc project -q) \
+       -e openshift_token=$(oc whoami -t) \
+       -e openshift_master_url=$(oc whoami --show-server)
+
 
 ansible-playbook -vvv playbooks/provision.yml \
        -e namespace=$(oc project -q) \

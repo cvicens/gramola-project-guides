@@ -14,7 +14,7 @@ before_install:
 
 script:
   - cd apb
-  - docker build -f Dockerfile -t $REPO:$TRAVIS_COMMIT .
+  - docker build -f Dockerfile --label "com.redhat.apb.spec=$(base64 --wrap=0 apb.yml)" -t $REPO:$TRAVIS_COMMIT .
 
 after_success:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
